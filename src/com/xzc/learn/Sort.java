@@ -1,8 +1,6 @@
 package com.xzc.learn;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /**
  * @Author: ZCXu1
@@ -13,12 +11,13 @@ import java.util.Random;
 public class Sort {
     /**
      * 生成指定范围内的随机数
+     *
      * @param min 最小整数
      * @param max 最大整数
      * @return 范围内随机数
      */
-    private static int randomInt(int min, int max){
-        return new Random().nextInt(max)%(max-min+1)+min;
+    private static int randomInt(int min, int max) {
+        return new Random().nextInt(max) % (max - min + 1) + min;
     }
 
     public static void swap(int[] arr, int i, int j) {
@@ -112,8 +111,9 @@ public class Sort {
             a[l + i] = help[i];
         }
     }
+
     // 快速排序
-    public static void quickSort(int[] a){
+    public static void quickSort(int[] a) {
         // 普通的快排中划分是前面是<=区域A 后面是> 区域
         // 方法是双指针 一个指针是A区域右边界（包含），一个是遍历数组的i
         // 当a[i]<=k的时候 A区域右边第一个元素和a[i]交换 并且A右边界扩充， i++
@@ -122,50 +122,117 @@ public class Sort {
         // 选最后一个数当k 划分k左边的部分 然后和=区域的右边界后第一个也就是>区域的第一个交换
         // 避免最差情况 要随机选一个数和最后交换
         if (a == null || a.length < 2) return;
-        helper(a,0,a.length - 1);
+        helper(a, 0, a.length - 1);
     }
-    private static void helper(int[] a, int l, int r){
-        if (l < r){
-            int k = randomInt(l,r);
-            swap(a,k,r);
-            int[] p = partition(a,l,r);
-            helper(a,l,p[0]-1);
-            helper(a,p[1]+1,r);
+
+    private static void helper(int[] a, int l, int r) {
+        if (l < r) {
+            int k = randomInt(l, r);
+            swap(a, k, r);
+            int[] p = partition(a, l, r);
+            helper(a, l, p[0] - 1);
+            helper(a, p[1] + 1, r);
         }
     }
+
     // 返回=区域的左边界和右边界（左右都是闭区间）
-    private static int[] partition(int[] a, int l, int r){
+    private static int[] partition(int[] a, int l, int r) {
         // 取最后一个数做基准
         // 划分a[r]前面的部分
         // 荷兰国旗 三指针
         int p1 = l - 1, p2 = r; // 划分pivot前面的部分 所以边界不是r+1是r
-        for (int i = l; i < p2;){
-            if (a[i] < a[r]){
-                swap(a,i++,++p1);
-            }else if (a[i] == a[r]){
+        for (int i = l; i < p2; ) {
+            if (a[i] < a[r]) {
+                swap(a, i++, ++p1);
+            } else if (a[i] == a[r]) {
                 i++;
-            }else{
-                swap(a,i,--p2);
+            } else {
+                swap(a, i, --p2);
             }
         }
         // [<,<,<,....,<,=,=,...,=,>,>,....>,pivot]
         // [.........,p1,.........,p2,......,r]
-        swap(a,p2,r);
+        swap(a, p2, r);
         // [<,<,<,....,<,=,=,...,=,pivot,>,....>]
         // [.........,p1,.........,p2    ,......]
-        return new int[]{p1+1,p2};
+        return new int[]{p1 + 1, p2};
 
     }
 
+    public static void heapSort(int[] a) {
+        if (a == null || a.length < 2) return;
+        int n = a.length;
+        Heap h = new Heap(n);
+        for (int i = 0; i < n; i++) {
+            h.heapInsert(a[i]);
+        }
+        for (int i = 0; i < n; i++) {
+            a[n - i - 1] = h.popMax();
+        }
 
+    }
 
+    private static int maxBits(int[] a) {
+        int max = Integer.MIN_VALUE;
+        for (int i = 0; i < a.length; i++) {
+            max = Math.max(max, a[i]);
+        }
+        int res = 0;
+        while (max > 0) {
+            res++;
+            max /= 10;
+        }
+        return res;
+    }
+
+    // 获得n的第i位数，个位为第0位
+    private static int getCertainDigit(int n, int i){
+        int res = 0; // n总共多少位
+        int b = n;
+        while (b > 0) {
+            res++;
+            b /= 10;
+        }
+        n %= Math.pow(10,i+1);
+        n /= Math.pow(10,i);
+        return n;
+    }
+
+    public static void radixSort(int[] a) {
+        if (a == null || a.length < 2) return;
+        List<Deque<Integer>> queues = new ArrayList<>();
+        final int radix = 10;
+        List<Integer> tmp = new ArrayList<>();
+        for (int i = 0; i < radix; i++) {
+            queues.add(new ArrayDeque<>());
+        }
+        int n = a.length;
+        // 找出数组中位数最多的数的位数
+        int maxB = maxBits(a);
+        // 有多少位就进出多少次
+        for (int i = 0; i < maxB; i++) {
+            // a[j]按照第i位的数字进桶
+            for (int j = 0; j < n; j++) {
+                queues.get(getCertainDigit(a[j],i)).addLast(a[j]);
+            }
+            // 从左到右出桶
+            for (int j = 0; j < radix; j++) {
+                while (!queues.get(j).isEmpty()){
+                    tmp.add(queues.get(j).pollFirst());
+                }
+            }
+            for (int j = 0; j < n; j++) {
+                a[j] = tmp.get(j);
+            }
+            tmp.clear();
+        }
+
+    }
 
     public static void main(String[] args) {
-        int[] a = new int[]{10, 9, 8, 5, 8, 1, 2};
-        int[] b = new int[]{5,2,3,1};
-        quickSort(a);
-        quickSort(b);
+
+        int[] a = new int[]{10,9,8,6,5,0,13};
+        radixSort(a);
         System.out.println(Arrays.toString(a));
-        System.out.println(Arrays.toString(b));
     }
 }

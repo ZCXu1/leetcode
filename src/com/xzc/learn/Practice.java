@@ -1,6 +1,7 @@
 package com.xzc.learn;
 
 import java.util.Arrays;
+import java.util.PriorityQueue;
 
 /**
  * @Author: ZCXu1
@@ -92,12 +93,32 @@ public class Practice {
         return a[left];
     }
 
+    public static void almostInOrder(int[] a, int k){
+        PriorityQueue<Integer> heap = new PriorityQueue<>();
+        // k << a.length
+        int index = 0;
+        while (index <= k){
+            // 把前k+1个数放进堆
+            heap.add(a[index++]);
+        }
+        // 此时index是堆的右边界(开区间)
+        int i = 0;
+        while (index < a.length){
+            // 直到堆右边界和数组右边界重合停下
+            heap.add(a[index++]);
+            a[i++] = heap.poll();
+        }
+        while (!heap.isEmpty()){
+            a[i++] = heap.poll();
+        }
+    }
+
     public static void main(String[] args) {
-        System.out.println(getOnlyOdd(new int[]{1, 1, 2, 2, 3, 4, 3, 5, 6, 6, 5}));
-        System.out.println(Arrays.toString(get2Odds(new int[]{1, 1, 2, 2, 3, 4, 7, 3, 5, 6, 6, 5})));
-        int[] a = Utils.randomArray(20,100,10);
+        int[] a = new int[]{1, 1, 2, 2, 3, 4, 3, 5, 6, 6, 5};
         System.out.println(Arrays.toString(a));
-        System.out.println(getPartMin(a));
+        almostInOrder(a,3);
+        System.out.println(Arrays.toString(a));
+
     }
 
 }
